@@ -1,0 +1,472 @@
+<% require 'http'  %>
+<p id="notice"><%= notice %></p>
+<script src="//maps.google.com/maps/api/js?v=3.18&sensor=false&client=&key=&libraries=geometry&language=&hl=&region="></script> 
+<script src="//google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.0.14/src/markerclusterer_packed.js"></script>
+<script src='//google-maps-utility-library-v3.googlecode.com/svn/tags/infobox/1.1.9/src/infobox_packed.js' type='text/javascript'></script>
+<script src='//google-maps-utility-library-v3.googlecode.com/svn/trunk/richmarker/src/richmarker-compiled.js' type='text/javascript'></script>
+
+<h1>Listing Trips</h1>
+
+<div style="float:right;">
+<p id="demo"></p>
+
+<button type = "button" onclick="calculate()">Run</button>
+<br /><br />
+<p id="showit"></p>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Pick lat</th>
+      <th>Pick lng</th>
+      
+      <th>Pick time</th>
+      <th>Pick range</th>
+      
+      <th>Drop lat</th>
+      
+      <th>Drop lng</th>
+      <th>Drop time</th>
+      <th>Drop range</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @trips.each do |trip| %>
+      <tr>
+        
+        <td><%= trip.pick_lat %></td>
+        
+        <td><%= trip.pick_lng %></td>
+        <td><%= trip.pick_time %></td>
+        <td><%= trip.pick_range %></td>
+        
+        <td><%= trip.drop_lat %></td>
+        
+        <td><%= trip.drop_lng %></td>
+        <td><%= trip.drop_time %></td>
+        <td><%= trip.drop_range %></td>
+        <td><%= link_to 'Show', trip %></td>
+        <td><%= link_to 'Edit', edit_trip_path(trip) %></td>
+        <td><%= link_to 'Destroy', trip, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+<%= link_to 'New Trip', new_trip_path %>
+<div style='width: 800px;'>
+  <div id="map" style='width: 800px; height: 400px;'></div>
+</div>
+
+<script>
+  var A = new Array(6);
+  var B = new Array(6);
+  var dis = new Array(6);
+  var disA = new Array(6);
+  var disB = new Array(6);
+  var range = new Array(12);
+  for(var i = 0 ; i < 6; i++){
+   dis[i] = new Array(6);
+   disA[i] = new Array(6);
+   disB[i] = new Array(6);
+  } 
+  
+  var i = 0;
+  <% require 'http' %>
+
+<% @trips.each do |hash| %>
+  s = (<%= sprintf("%f",hash.pick_time)  %>).toString();
+  s1 = new Date(0);
+  s1.setUTCSeconds(parseInt(s));
+  A[i] = s1.getUTCHours() + (s1.getUTCMinutes()/60);
+  
+  s = (<%= sprintf("%f",hash.drop_time)  %>).toString();
+  s1 = new Date(0);
+  s1.setUTCSeconds(parseInt(s));
+  B[i++] = s1.getUTCHours() + (s1.getUTCMinutes()/60);
+<% end %>
+
+i = 0;
+<% @trips.each do |hash| %>
+  //alert(typeof pick_range);
+ s = (<%= sprintf("%f",hash.pick_range)  %>).toString();
+  //s = 1;
+  s1 = new Date(0);
+  s1.setUTCSeconds(parseInt(s));
+
+  range[i++] = s1.getUTCHours() +  (s1.getUTCMinutes())/60;
+<% end %>
+
+<% @trips.each do |hash| %>
+  s = (<%= sprintf("%f",hash.pick_range)  %>).toString();
+  //s = 1;
+  s1 = new Date(0);
+  s1.setUTCSeconds(parseInt(s));
+  range[i++] = s1.getUTCHours() +  (s1.getUTCMinutes())/60;
+<% end %>
+
+i = 0;
+
+<% @trips.each do |hash| %>  
+   var j = 0;
+  <% @trips.each do |hash2| %> 
+
+  var s = <%= raw HTTP.get('https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + sprintf("%f",hash.pick_lat) + ',' + sprintf("%f",hash.pick_lng) + '&destinations=' + sprintf("%f",hash2.drop_lat) + ',' + sprintf("%f",hash2.drop_lng) + "&key=AIzaSyA8VCbrn_T6-b0bh6xTWNwIbfmfhpXwYsk")  %>; 
+   //console.log(dis[i][j]);console.log(i + " " + j);
+   //   if(typeof dis[i][j] == "undefined")dis[i][j] = -1;
+      //s = dis[0][0];
+      var s2 = s.rows;
+      var s3 = s2[0].elements;
+      if(s3[0].status == "OK"){
+      var s4 = s3[0].duration;
+      var s5 = s4.text;
+     var temp_arr = s5.split(' ');
+  if(temp_arr.length > 2){
+     var work = parseFloat(temp_arr[0]);
+     dis[i][j] = work + (parseFloat(temp_arr[2])/60);
+  }else{
+     var work = parseFloat(temp_arr[0]);
+     dis[i][j] = work/60;
+     //console.log(work);
+  }
+      
+ }else dis[i][j] = -1;
+
+     j++;
+ <% end %>
+  i++;
+<% end %>
+i = 0;
+<%  @trips.each do |hash|  %>
+   var j = 0;
+  <%  @trips.each do |hash2|  %> 
+   var s = <%= raw HTTP.get('https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + sprintf("%f",hash.pick_lat) + ',' + sprintf("%f",hash.pick_lng) + '&destinations=' + sprintf("%f",hash2.pick_lat) + ',' + sprintf("%f",hash2.pick_lng) + "&key=AIzaSyA8VCbrn_T6-b0bh6xTWNwIbfmfhpXwYsk")  %>; 
+   //console.log(dis[i][j]);console.log(i + " " + j);
+    var s2 = s.rows;
+      var s3 = s2[0].elements;
+      if(s3[0].status == "OK"){
+      var s4 = s3[0].duration;
+      var s5 = s4.text;
+     var temp_arr = s5.split(' ');
+  if(temp_arr.length > 2){
+     var work = parseFloat(temp_arr[0]);
+     disA[i][j] = work + (parseFloat(temp_arr[2])/60);
+  }else{
+     var work = parseFloat(temp_arr[0]);
+     disA[i][j] = work/60;
+     //console.log(work);
+  }
+      
+ }else disA[i][j] = -1;
+
+    
+
+    j++;
+  <% end %>
+ i++;
+<% end %>
+
+i = 0;
+
+<%  @trips.each do |hash|  %>
+   var j = 0;
+  <%  @trips.each do |hash2|  %> 
+   var s = <%= raw HTTP.get('https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + sprintf("%f",hash.drop_lat) + ',' + sprintf("%f",hash.drop_lng) + '&destinations=' + sprintf("%f",hash2.drop_lat) + ',' + sprintf("%f",hash2.drop_lng) + "&key=AIzaSyA8VCbrn_T6-b0bh6xTWNwIbfmfhpXwYsk")  %>; 
+   //console.log(dis[i][j]);console.log(i + " " + j);
+     //console.log(<%= hash.drop_lat %> + " " + i + " " + j);
+     
+
+
+
+   var s2 = s.rows;
+      var s3 = s2[0].elements;
+      //console.log(s);
+      if(s3[0].status == "OK"){
+      var s4 = s3[0].duration;
+      var s5 = s4.text;
+     var temp_arr = s5.split(' ');
+  if(temp_arr.length > 2){
+     var work = parseFloat(temp_arr[0]);
+     disB[i][j] = work + (parseFloat(temp_arr[2])/60);
+  }else{
+     var work = parseFloat(temp_arr[0]);
+     disB[i][j] = work/60;
+     //console.log(work);
+  }
+      
+ }else disB[i][j] = -1;
+
+
+
+    j++;
+  <% end %>
+  i++;
+<% end %>
+
+for(var i = 0 ; i < 6 ; i++){
+ for(j = 0 ; j < 6 ; j++){
+   if(dis[i][j] == -1){
+     alert("Cannot proess request -- Error in path between coordinates");
+     break;
+   }
+   //console.log(dis[i][j]);
+ }
+   if(dis[i][j] == -1){
+    // alert("Cannot proess request -- Error in path between oordinates");
+     break;
+   }
+}
+//console.log(" ");
+for(var i = 0 ; i < 6 ; i++){
+ for(j = 0 ; j < 6 ; j++){
+
+  if(disA[i][j] == -1){
+     alert("Cannot proess request -- Error in path between coordinates");
+     break;
+   }
+   //console.log(disA[i][j]);
+ }
+   if(disA[i][j] == -1){
+    // alert("Cannot proess request -- Error in path between oordinates");
+     break;
+   }
+}
+//console.log(" ");
+for(var i = 0 ; i < 6 ; i++){
+ for(var j = 0 ; j < 6 ; j++){
+
+if(disB[i][j] == -1){
+     alert("Cannot proess request -- Error in path between coordinates");
+     break;
+   }
+  //console.log(disB[i][j]);
+ }
+   if(disB[i][j] == -1){
+    // alert("Cannot proess request -- Error in path between oordinates");
+     break;
+   }
+}
+var s = "";
+function calculate(){
+var count  = 0;
+//console.log("hello it works !!");
+var record = new Array();
+var visited = new Array();
+var wor = 1;
+var temp,minval,minval2,minval3;
+while(count < 6){
+  wor = 1;
+  minval = min(A);
+  temp = A[minval];
+  A[minval] = 2000;  
+  minval2 = min(A);
+  minval3 = min(B);
+  A[minval] = temp;
+  //console.log(minval);
+  if(A[minval] == 2000){
+    while(B[minval3] != 2000){
+     console.log("drop at " + B[minval3]);
+     s += "drop at " + (7 + minval3) + "<br>";
+     record.push(6 + minval3);
+     B[minval3] = 2000;
+     minval3 = min(B);
+    }
+   break;
+  }
+ 
+  if(A[minval2] == 2000){
+    console.log("pick from " + A[minval]);
+    s += "pick from " + (1 + minval) + "<br>";
+    record.push(minval);
+    while(B[minval3] != 2000){
+     console.log("drop at " + B[minval3]);
+     s += "drop at " + (7 + minval3) + "<br>";
+     record.push(6 + minval3);
+     B[minval3] = 2000;
+     minval3 = min(B);
+   }
+   break;
+  }
+ 
+  console.log("pick from " + A[minval] );
+  
+ // console.log(A[0]);
+  if(visited.length == 0){visited.push(minval);}
+  else if(visited[visited.length - 1] != minval){visited.push(minval);}
+
+ /* if(record.length == 0){record.push(minval);}
+  else if(record[record.length - 1] != minval){record.push(minval);}
+
+*/
+
+   if(A[minval] + disA[minval][minval2] + dis[minval2][minval3] > B[minval3] + range[6 + minval3]){
+    console.log("cannot reach " + A[minval3] + " " + B[minval3]);
+    s += "cannot reach " + A[minval3] + " " + B[minval3] + "<br>";
+    A[minval3] = 2000;
+    B[minval3] = 2000;
+    count--;
+    wor = 2;
+   }
+
+ if(A[minval] + disA[minval][minval2] > A[minval2] + range[minval2]){
+    console.log("cannot reach " + A[minval2] + " " + B[minval2] );
+    s += "cannot reach " + A[minval2] + " " + B[minval2] + "<br>"; 
+    A[minval2] = 2000;
+    B[minval2] = 2000;
+    count--;
+    wor = 2;
+  }
+ //console.log(wor + " " + minval);
+  if(wor != 2){
+   record.push(minval);
+   s += "pick from " + (1 + minval) + "<br>";
+  if((A[minval] + disA[minval][minval2] + dis[minval2][minval3] <= B[minval3] + range[6 + minval3]) &&
+  (A[minval] + disA[minval][minval2] + dis[minval2][minval3] >= B[minval3])
+  ){
+    var y = 0;
+    for(var z = 0; z < visited.length ; z++){
+      if(visited[z] == minval3  && B[minval3] != 2000){
+        console.log("drop at " + B[minval3]);
+        
+        if(B[minval3] != 2000){record.push(6 + minval3);s += "drop at " + ( 7 + minval3 ) + "<br>";}
+        B[minval3] = 2000;
+        visited[z] = 1000;   
+     } 
+     y = z;
+    }
+  if(y >= visited.length){
+     if(A[minval] + disA[minval][minval3] + dis[minval3][minval3] <= B[minval3] + range[6 + minval3]){
+      console.log("pick from " + A[minval3]);
+      console.log("drop at " + B[minval3]);
+      
+      
+      if(A[minval3] != 2000){record.push(minval3);s += "pick from " + (1 + minval3) + "<br>";}
+      if(B[minval3] != 2000){record.push(6 + minval3);s += "drop at " + (7 + minval3) + "<br>";}
+      A[minval3] = 2000;
+      B[minval3] = 2000;    
+      }else{
+      console.log("cannot reach " + A[minval3] + " " + B[minval3]);
+      s += "cannot reach " + A[minval3] + " " + B[minval3] + "<br>";
+      A[minval3] = 2000;
+      B[minval3] = 2000;
+      count--;
+      wor = 2;
+       }
+      }
+     }else if((A[minval] + disA[minval][minval2] <= A[minval2] + range[minval2]) && (A[minval] + disA[minval][minval2] >= A[minval2])){
+       console.log("pick from " + A[minval2]);
+      
+       if(A[minval2] != 2000){record.push(minval2); s += "pick from " + (1 + minval2) + "<br>";}
+       visited.push(minval2);
+       A[minval2] = 2000;
+     }else{
+       diff = A[minval] + disA[minval][minval2] + dis[minval2][minval3] - B[minval3] ;
+       diff = -1*diff;
+       diff2 = A[minval] + disA[minval][minval2] - A[minval2];
+       diff2 = -1*diff2;
+       if(diff > diff2){
+          console.log("pick from " + A[minval2]);
+          
+          if(A[minval2] != 2000){record.push(minval2);s += "pick from " + (1 + minval2) + "<br>";}
+          A[minval2] = 2000;
+        }else{
+          console.log("drop at " + B[minval3]);
+         
+          if(B[minval3] != 2000){record.push(6 + minval3); s += "drop at " + (7 + minval3) + "<br>";}
+          //record.push(6 + minval3);
+          B[minval3] = 2000;
+        }          
+
+     } 
+    if(wor != 2)A[minval] = 2000;
+  count++;
+    }
+  }
+
+ var obj2 = <%= raw @hash.to_json() %>;
+  var obj3 = <%= raw @hash2.to_json() %>;
+  for(var i = 0 ; i < obj3.length ; i++){
+    obj2.push(obj3[i]);
+  }
+ 
+  var z;var con = false;
+  for(var z = 0 ; z < record.length ; z++){
+     obj2[record[z]].infowindow = (z + 1).toString();
+     
+  }
+  
+ if(z == obj2.length)con = true;
+ if(con){
+  buildMap(obj2);
+
+/*  handler = Gmaps.build('Google');
+  handler.buildMap({ provider: {}, internal: {id: 'map'}}, function(){
+  markers = handler.addMarkers(obj2);
+  handler.bounds.extendWith(markers);
+  handler.fitMapToBounds();
+  handler.getMap().setZoom(12);
+  
+});
+
+_.each(obj2, function(marker){
+  google.maps.event.trigger(marker.infowindow, 'click');
+});
+*/
+} 
+
+ document.getElementById("showit").innerHTML = s ;
+  
+}
+
+function min(arr){
+    var minval = 0;
+   for(var i = 0 ; i < arr.length ; i++){
+     minval = (arr[minval] > arr[i])? i:minval ;
+   }
+    return minval;
+  }
+
+
+
+
+ 
+
+</script>  
+
+
+<!--
+
+
+
+if(A[minval] + dis[minval][minval3] + dis[minval2][minval3] <= A[minval2] + range[minval2]){
+      diff =  (A[minval] + disA[minval][minval2] + dis[minval2][minval3]) - (B[minval3] + range[2 + minval3]);
+      diff= -1*diff; 
+      diff2 = (A[minval] + dis[minval][minval3] + dis[minval2][minval3]) - (A[minval2] + range[minval2]) ;
+      diff2 = -1*diff2;
+      if(diff > diff2){
+        if(B[minval3] != 2000){
+         console.log("drop at " + B[minval3]);
+         B[minval3] = 2000;
+        }
+       }else{
+         console.log("pick from " + A[minval2]);
+         visited.push(minval2);
+         A[minval2] = 2000;
+          }
+        }     
+        break;
+       }else{
+        console.log("cannot reach " + );
+      }
+
+
+
+
+
+
+
+-->
+

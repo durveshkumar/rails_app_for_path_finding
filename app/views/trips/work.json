@@ -1,0 +1,26 @@
+{
+   "destination_addresses" : [
+      "Hanuman Tekdi, Kanjurmarg West, Bhandup West, Mumbai, Maharashtra, India"
+   ],
+   "origin_addresses" : [
+      "H-5 Wing III, Students' Residential Zone, IIT Area, Powai, Mumbai, Maharashtra 400076, India"
+   ],
+   "rows" : [
+      {
+         "elements" : [
+            {
+               "distance" : {
+                  "text" : "2.8 km",
+                  "value" : 2799
+               },
+               "duration" : {
+                  "text" : "14 mins",
+                  "value" : 832
+               },
+               "status" : "OK"
+            }
+         ]
+      }
+   ],
+   "status" : "OK"
+}

@@ -1,0 +1,65 @@
+<%= form_for(@trip) do |f| %>
+  <% if @trip.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@trip.errors.count, "error") %> prohibited this trip from being saved:</h2>
+
+      <ul>
+      <% @trip.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :pick_lat %><br>
+    <%= f.text_field :pick_lat %>
+  </div>
+  <div class="field">
+    <%= f.label :pick_lat %><br>
+    <%= f.text_field :pick_lat %>
+  </div>
+  <div class="field">
+    <%= f.label :pick_lng %><br>
+    <%= f.text_field :pick_lng %>
+  </div>
+  <div class="field">
+    <%= f.label :pick_lng %><br>
+    <%= f.text_field :pick_lng %>
+  </div>
+  <div class="field">
+    <%= f.label :pick_time %><br>
+    <%= f.datetime_select :pick_time %>
+  </div>
+  <div class="field">
+    <%= f.label :pick_range %><br>
+    <%= f.time_select :pick_range %>
+  </div>
+  <div class="field">
+    <%= f.label :drop_lat %><br>
+    <%= f.text_field :drop_lat %>
+  </div>
+  <div class="field">
+    <%= f.label :drop_lat %><br>
+    <%= f.text_field :drop_lat %>
+  </div>
+  <div class="field">
+    <%= f.label :drop_lng %><br>
+    <%= f.text_field :drop_lng %>
+  </div>
+  <div class="field">
+    <%= f.label :drop_lng %><br>
+    <%= f.text_field :drop_lng %>
+  </div>
+  <div class="field">
+    <%= f.label :drop_time %><br>
+    <%= f.datetime_select :drop_time %>
+  </div>
+  <div class="field">
+    <%= f.label :drop_range %><br>
+    <%= f.time_select :drop_range %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

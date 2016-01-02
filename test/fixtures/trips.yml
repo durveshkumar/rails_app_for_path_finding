@@ -1,0 +1,29 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  pick_lat: 
+  pick_lat: 
+  pick_lng: 
+  pick_lng: 
+  pick_time: 2015-12-23 11:31:34
+  pick_range: 2015-12-23 11:31:34
+  drop_lat: 
+  drop_lat: 
+  drop_lng: 
+  drop_lng: 
+  drop_time: 2015-12-23 11:31:34
+  drop_range: 2015-12-23 11:31:34
+
+two:
+  pick_lat: 
+  pick_lat: 
+  pick_lng: 
+  pick_lng: 
+  pick_time: 2015-12-23 11:31:34
+  pick_range: 2015-12-23 11:31:34
+  drop_lat: 
+  drop_lat: 
+  drop_lng: 
+  drop_lng: 
+  drop_time: 2015-12-23 11:31:34
+  drop_range: 2015-12-23 11:31:34
